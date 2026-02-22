@@ -21,6 +21,22 @@ The application will be available at http://localhost:8080. The `GET /ping` rout
 
 To verify (with the app running): `curl http://localhost:8080/ping` — expected response: `pong`.
 
+## Docker
+
+Build the image:
+
+```bash
+docker build -t devops-app .
+```
+
+Run the container:
+
+```bash
+docker run -p 8080:8080 devops-app
+```
+
+The app will be available at http://localhost:8080.
+
 ## Development
 
 Run tests: `make test`
