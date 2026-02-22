@@ -29,10 +29,10 @@ Build the image:
 docker build -t devops-app .
 ```
 
-Run the container:
+Run the container (pass `SENTRY_DSN` at runtime; it is not stored in the image):
 
 ```bash
-docker run -p 8080:8080 devops-app
+docker run -p 8080:8080 -e SENTRY_DSN="<your-sentry-dsn>" devops-app
 ```
 
 The app will be available at http://localhost:8080.
