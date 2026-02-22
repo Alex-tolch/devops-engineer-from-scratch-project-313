@@ -5,7 +5,8 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock* ./
 
-RUN uv sync --frozen --no-dev --no-install-project
+# Without --frozen so build works when uv.lock is not in context (e.g. not committed)
+RUN uv sync --no-dev --no-install-project
 
 # Runtime stage
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
