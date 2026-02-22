@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Alex-tolch/devops-engineer-from-scratch-project-313/actions/workflows/ci.yml/badge.svg)](https://github.com/Alex-tolch/devops-engineer-from-scratch-project-313/actions/workflows/ci.yml)
 
+**Live:** [https://devops-engineer-from-scratch-project-313-zxph.onrender.com](https://devops-engineer-from-scratch-project-313-zxph.onrender.com)
+
 ## Running the application
 
 Requirements: [uv](https://docs.astral.sh/uv/) (Python project manager).
