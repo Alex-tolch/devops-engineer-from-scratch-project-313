@@ -1,4 +1,13 @@
 from flask import Flask
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://30f72f59b1b94f14bdc9d8c12fe529b2@o4510930299125760.ingest.de.sentry.io/4510930312560720",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
+
 
 app = Flask(__name__)
 
