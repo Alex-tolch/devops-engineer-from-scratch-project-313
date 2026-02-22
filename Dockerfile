@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
-COPY main.py .
+COPY main.py models.py database.py ./
 
 EXPOSE 8080
 

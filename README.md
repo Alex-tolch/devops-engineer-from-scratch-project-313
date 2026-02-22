@@ -21,7 +21,19 @@ Requirements: [uv](https://docs.astral.sh/uv/) (Python project manager).
 
 The application will be available at http://localhost:8080. The `GET /ping` route returns the string `pong`.
 
+**Environment variables (optional):**
+- `DATABASE_URL` — PostgreSQL connection string (e.g. `postgres://user:pass@host:5432/dbname`). If not set, SQLite is used locally.
+- `BASE_URL` — base URL for short links (e.g. `https://short.io`). Used to build `short_url` in API responses.
+
 To verify (with the app running): `curl http://localhost:8080/ping` — expected response: `pong`.
+
+### Links API (CRUD)
+
+- `GET /api/links` — list all links
+- `POST /api/links` — create link (body: `{"original_url": "...", "short_name": "..."}`)
+- `GET /api/links/<id>` — get link by id
+- `PUT /api/links/<id>` — update link
+- `DELETE /api/links/<id>` — delete link
 
 ## Docker
 
@@ -31,10 +43,14 @@ Build the image:
 docker build -t devops-app .
 ```
 
-Run the container (pass `SENTRY_DSN` at runtime; it is not stored in the image):
+Run the container (pass env at runtime; secrets are not stored in the image):
 
 ```bash
-docker run -p 8080:8080 -e SENTRY_DSN="<your-sentry-dsn>" devops-app
+docker run -p 8080:8080 \
+  -e SENTRY_DSN="<your-sentry-dsn>" \
+  -e DATABASE_URL="postgres://..." \
+  -e BASE_URL="https://your-domain.com" \
+  devops-app
 ```
 
 The app will be available at http://localhost:8080.
