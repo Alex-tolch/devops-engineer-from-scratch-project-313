@@ -9,6 +9,7 @@ from models import Link
 
 if os.path.exists(".env"):
     from dotenv import load_dotenv
+
     load_dotenv()
 
 sentry_sdk.init(
@@ -52,7 +53,9 @@ def create_link():
     if not original_url or not short_name:
         return {"error": "original_url and short_name are required"}, 422
     with Session(engine) as session:
-        existing = session.exec(select(Link).where(Link.short_name == short_name)).first()
+        existing = session.exec(
+            select(Link).where(Link.short_name == short_name)
+        ).first()
         if existing:
             return {"error": "short_name already exists"}, 422
         link = Link(original_url=original_url, short_name=short_name)

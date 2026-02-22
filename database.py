@@ -9,7 +9,9 @@ _db_url = os.environ.get("DATABASE_URL", "").strip()
 engine = create_engine(
     _db_url or "sqlite:///./links.db",
     echo=False,
-    connect_args={"check_same_thread": False} if "sqlite" in (_db_url or "sqlite") else {},
+    connect_args={"check_same_thread": False}
+    if "sqlite" in (_db_url or "sqlite")
+    else {},
 )
 
 
