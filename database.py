@@ -4,6 +4,8 @@ from sqlmodel import Session, create_engine
 
 from models import Link
 
+_db_url = os.environ.get("DATABASE_URL", "").strip()
+
 engine = create_engine(
     _db_url or "sqlite:///./links.db",
     echo=False,
