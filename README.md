@@ -1,2 +1,22 @@
+## Running the application
+
+Requirements: [uv](https://docs.astral.sh/uv/) (Python project manager).
+
+1. Install dependencies (uv will create a virtual environment and install dependencies):
+
+   ```bash
+   uv sync
+   ```
+
+2. Run the application:
+   ```bash
+   make run
+   ```
+
+The application will be available at http://localhost:8080. The `GET /ping` route returns the string `pong`.
+
+---
+
 ### Hexlet tests and linter status:
+
 [![Actions Status](https://github.com/Alex-tolch/devops-engineer-from-scratch-project-313/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Alex-tolch/devops-engineer-from-scratch-project-313/actions)
