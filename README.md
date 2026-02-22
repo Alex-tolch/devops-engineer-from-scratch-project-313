@@ -1,3 +1,7 @@
+### CI status
+
+[![CI](https://github.com/Alex-tolch/devops-engineer-from-scratch-project-313/actions/workflows/ci.yml/badge.svg)](https://github.com/Alex-tolch/devops-engineer-from-scratch-project-313/actions/workflows/ci.yml)
+
 ## Running the application
 
 Requirements: [uv](https://docs.astral.sh/uv/) (Python project manager).
@@ -14,6 +18,14 @@ Requirements: [uv](https://docs.astral.sh/uv/) (Python project manager).
    ```
 
 The application will be available at http://localhost:8080. The `GET /ping` route returns the string `pong`.
+
+To verify (with the app running): `curl http://localhost:8080/ping` — expected response: `pong`.
+
+## Development
+
+Run tests: `make test`
+
+Run linter (Ruff): `make lint`
 
 ---
 
