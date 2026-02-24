@@ -87,11 +87,9 @@ def list_links():
         offset = start
         limit = end - start
 
-        links = (
-            session.exec(
-                select(Link).order_by(Link.id).offset(offset).limit(limit)
-            ).all()
-        )
+        links = session.exec(
+            select(Link).order_by(Link.id).offset(offset).limit(limit)
+        ).all()
         if total == 0:
             content_range = "links 0-0/0"
         else:
