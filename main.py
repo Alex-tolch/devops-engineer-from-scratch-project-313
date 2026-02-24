@@ -1,7 +1,10 @@
 import os
+import re
 
 import sentry_sdk
 from flask import Flask, request
+from flask_cors import CORS
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from database import engine, init_db
@@ -18,6 +21,15 @@ sentry_sdk.init(
 )
 
 app = Flask(__name__)
+
+# CORS for frontend in development (http://localhost:5173)
+CORS(
+    app,
+    origins=["http://localhost:5173"],
+    methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Content-Range", "Range", "Authorization"],
+    supports_credentials=True,
+)
 
 
 def _base_url() -> str:
@@ -38,11 +50,62 @@ def ping():
     return "pong"
 
 
+def _parse_range(range_str: str | None) -> tuple[int, int] | None:
+    """Parse range=[start,end] from query. Returns (start, end) or None."""
+    if not range_str or not range_str.strip():
+        return None
+    match = re.match(r"^\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*$", range_str.strip())
+    if not match:
+        return None
+    start, end = int(match.group(1)), int(match.group(2))
+    if end < start:
+        return None
+    return (start, end)
+
+
 @app.route("/api/links", methods=["GET"])
 def list_links():
     with Session(engine) as session:
-        links = session.exec(select(Link).order_by(Link.id)).all()
-        return [_link_to_json(link) for link in links]
+        count_row = session.exec(select(func.count()).select_from(Link)).one()
+        total = count_row[0] if hasattr(count_row, "__getitem__") else count_row
+
+        range_param = _parse_range(request.args.get("range"))
+        if range_param is None:
+            # No range: return all
+            links = session.exec(select(Link).order_by(Link.id)).all()
+            if total == 0:
+                content_range = "links 0-0/0"
+            else:
+                content_range = f"links 0-{total - 1}/{total}"
+            return (
+                [_link_to_json(link) for link in links],
+                200,
+                {"Content-Range": content_range},
+            )
+
+        start, end = range_param
+        offset = start
+        limit = end - start
+
+        links = (
+            session.exec(
+                select(Link).order_by(Link.id).offset(offset).limit(limit)
+            ).all()
+        )
+        if total == 0:
+            content_range = "links 0-0/0"
+        else:
+            last = min(start + len(links) - 1, total - 1) if links else start - 1
+            if last < start:
+                content_range = f"links 0-0/{total}"
+            else:
+                content_range = f"links {start}-{last}/{total}"
+
+        return (
+            [_link_to_json(link) for link in links],
+            200,
+            {"Content-Range": content_range},
+        )
 
 
 @app.route("/api/links", methods=["POST"])

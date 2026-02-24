@@ -61,6 +61,91 @@ def test_list_links_returns_created():
     assert links[0]["short_url"] == "https://short.io/r/one"
 
 
+def test_list_links_content_range_empty():
+    client = app.test_client()
+    response = client.get("/api/links")
+    assert response.status_code == 200
+    assert response.headers["Content-Range"] == "links 0-0/0"
+    assert response.get_json() == []
+
+
+def test_list_links_content_range_all():
+    client = app.test_client()
+    for i in range(3):
+        client.post(
+            "/api/links",
+            json={
+                "original_url": f"https://example.com/{i}",
+                "short_name": f"lnk{i}",
+            },
+            content_type="application/json",
+        )
+    response = client.get("/api/links")
+    assert response.status_code == 200
+    assert response.headers["Content-Range"] == "links 0-2/3"
+    assert len(response.get_json()) == 3
+
+
+def test_list_links_range_first_10():
+    client = app.test_client()
+    for i in range(15):
+        client.post(
+            "/api/links",
+            json={
+                "original_url": f"https://example.com/p{i}",
+                "short_name": f"pag{i:02d}",
+            },
+            content_type="application/json",
+        )
+    response = client.get("/api/links?range=[0,10]")
+    assert response.status_code == 200
+    assert response.headers["Content-Range"] == "links 0-9/15"
+    links = response.get_json()
+    assert len(links) == 10
+    assert links[0]["short_name"] == "pag00"
+    assert links[9]["short_name"] == "pag09"
+
+
+def test_list_links_range_skip_5():
+    client = app.test_client()
+    for i in range(11):
+        client.post(
+            "/api/links",
+            json={
+                "original_url": f"https://example.com/s{i}",
+                "short_name": f"skip{i:02d}",
+            },
+            content_type="application/json",
+        )
+    response = client.get("/api/links?range=[5,10]")
+    assert response.status_code == 200
+    assert response.headers["Content-Range"] == "links 5-9/11"
+    links = response.get_json()
+    assert len(links) == 5
+    assert links[0]["short_name"] == "skip05"
+    assert links[4]["short_name"] == "skip09"
+
+
+def test_list_links_range_beyond_total():
+    client = app.test_client()
+    for i in range(5):
+        client.post(
+            "/api/links",
+            json={
+                "original_url": f"https://example.com/b{i}",
+                "short_name": f"bey{i}",
+            },
+            content_type="application/json",
+        )
+    response = client.get("/api/links?range=[2,8]")
+    assert response.status_code == 200
+    assert response.headers["Content-Range"] == "links 2-4/5"
+    links = response.get_json()
+    assert len(links) == 3
+    assert links[0]["short_name"] == "bey2"
+    assert links[2]["short_name"] == "bey4"
+
+
 def test_get_link_by_id():
     client = app.test_client()
     create = client.post(
