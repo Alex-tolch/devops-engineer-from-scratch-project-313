@@ -19,7 +19,7 @@ COPY pyproject.toml uv.lock* ./
 RUN uv sync --no-dev --no-install-project
 ENV PATH="/app/.venv/bin:$PATH"
 
-COPY app/main.py app/models.py app/database.py ./
+COPY app/main.py app/models.py app/database.py app/routes.py app/links.py ./
 
 # Frontend static
 COPY --from=frontend /app/public /app/public

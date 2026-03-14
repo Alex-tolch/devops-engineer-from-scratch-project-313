@@ -4,7 +4,6 @@ from models import Link
 from sqlmodel import Session, create_engine
 
 _db_url = (os.environ.get("DATABASE_URL") or "").strip()
-# SQLAlchemy 2.x использует диалект "postgresql", а не "postgres"
 if _db_url.startswith("postgres://"):
     _db_url = "postgresql://" + _db_url[len("postgres://") :]
 
