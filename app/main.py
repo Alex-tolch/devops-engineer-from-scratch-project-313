@@ -105,6 +105,18 @@ def list_links():
         )
 
 
+def _validation_error_required() -> tuple[dict, int]:
+    return (
+        {
+            "detail": [
+                {"loc": ["body", "original_url"], "msg": "Field required"},
+                {"loc": ["body", "short_name"], "msg": "Field required"},
+            ]
+        },
+        422,
+    )
+
+
 @app.route("/api/links", methods=["POST"])
 def create_link():
     data = request.get_json(silent=True) or {}
@@ -113,13 +125,13 @@ def create_link():
     original_url = data.get("original_url")
     short_name = data.get("short_name")
     if not original_url or not short_name:
-        return {"error": "original_url and short_name are required"}, 422
+        return _validation_error_required()
     with Session(engine) as session:
         existing = session.exec(
             select(Link).where(Link.short_name == short_name)
         ).first()
         if existing:
-            return {"error": "short_name already exists"}, 422
+            return {"detail": "short_name already exists"}, 422
         link = Link(original_url=original_url, short_name=short_name)
         session.add(link)
         session.commit()
@@ -132,7 +144,7 @@ def get_link(link_id):
     with Session(engine) as session:
         link = session.get(Link, link_id)
         if not link:
-            return {"error": "Not Found"}, 404
+            return {"detail": "Not Found"}, 404
         return _link_to_json(link)
 
 
@@ -144,16 +156,16 @@ def update_link(link_id):
     original_url = data.get("original_url")
     short_name = data.get("short_name")
     if not original_url or not short_name:
-        return {"error": "original_url and short_name are required"}, 422
+        return _validation_error_required()
     with Session(engine) as session:
         link = session.get(Link, link_id)
         if not link:
-            return {"error": "Not Found"}, 404
+            return {"detail": "Not Found"}, 404
         existing = session.exec(
             select(Link).where(Link.short_name == short_name, Link.id != link_id)
         ).first()
         if existing:
-            return {"error": "short_name already exists"}, 422
+            return {"detail": "short_name already exists"}, 422
         link.original_url = original_url
         link.short_name = short_name
         session.add(link)
@@ -167,7 +179,7 @@ def delete_link(link_id):
     with Session(engine) as session:
         link = session.get(Link, link_id)
         if not link:
-            return {"error": "Not Found"}, 404
+            return {"detail": "Not Found"}, 404
         session.delete(link)
         session.commit()
         return "", 204
@@ -178,13 +190,13 @@ def redirect_by_short_name(short_name):
     with Session(engine) as session:
         link = session.exec(select(Link).where(Link.short_name == short_name)).first()
         if not link:
-            return {"error": "Not Found"}, 404
+            return {"detail": "Not Found"}, 404
         return redirect(link.original_url, code=302)
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return {"error": "Not Found"}, 404
+    return {"detail": "Not Found"}, 404
 
 
 @app.errorhandler(500)

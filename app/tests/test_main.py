@@ -43,7 +43,7 @@ def test_create_link_duplicate_short_name():
         content_type="application/json",
     )
     assert response.status_code == 422
-    assert response.get_json() == {"error": "short_name already exists"}
+    assert response.get_json() == {"detail": "short_name already exists"}
 
 
 def test_list_links_returns_created():
@@ -165,7 +165,7 @@ def test_get_link_404():
     client = app.test_client()
     response = client.get("/api/links/99999")
     assert response.status_code == 404
-    assert response.get_json() == {"error": "Not Found"}
+    assert response.get_json() == {"detail": "Not Found"}
 
 
 def test_update_link():
@@ -196,7 +196,7 @@ def test_update_link_404():
         content_type="application/json",
     )
     assert response.status_code == 404
-    assert response.get_json() == {"error": "Not Found"}
+    assert response.get_json() == {"detail": "Not Found"}
 
 
 def test_update_link_duplicate_short_name():
@@ -218,7 +218,7 @@ def test_update_link_duplicate_short_name():
         content_type="application/json",
     )
     assert response.status_code == 422
-    assert response.get_json() == {"error": "short_name already exists"}
+    assert response.get_json() == {"detail": "short_name already exists"}
 
 
 def test_delete_link():
@@ -240,4 +240,4 @@ def test_delete_link_404():
     client = app.test_client()
     response = client.delete("/api/links/99999")
     assert response.status_code == 404
-    assert response.get_json() == {"error": "Not Found"}
+    assert response.get_json() == {"detail": "Not Found"}
