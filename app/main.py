@@ -108,6 +108,8 @@ def list_links():
 @app.route("/api/links", methods=["POST"])
 def create_link():
     data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        data = {}
     original_url = data.get("original_url")
     short_name = data.get("short_name")
     if not original_url or not short_name:
@@ -137,6 +139,8 @@ def get_link(link_id):
 @app.route("/api/links/<int:link_id>", methods=["PUT"])
 def update_link(link_id):
     data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        data = {}
     original_url = data.get("original_url")
     short_name = data.get("short_name")
     if not original_url or not short_name:
