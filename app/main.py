@@ -1,10 +1,9 @@
 import os
 
 import sentry_sdk
+from database import init_db
 from flask import Flask
 from flask_cors import CORS
-
-from database import init_db
 from routes import bp
 
 if os.path.exists(".env"):

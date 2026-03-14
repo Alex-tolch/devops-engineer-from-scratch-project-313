@@ -1,16 +1,21 @@
 import os
 import re
 
-from flask import Blueprint, redirect, request
-
 from database import engine
+from flask import Blueprint, redirect, request
 from links import (
     create_link as create_link_record,
+)
+from links import (
     delete_link as delete_link_record,
+)
+from links import (
     get_link_by_id,
     get_link_by_short_name,
     get_links_with_total,
     short_name_exists,
+)
+from links import (
     update_link as update_link_record,
 )
 from models import Link

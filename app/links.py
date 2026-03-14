@@ -1,7 +1,6 @@
+from models import Link
 from sqlalchemy import func
 from sqlmodel import Session, select
-
-from models import Link
 
 
 def get_links_with_total(
