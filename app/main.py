@@ -2,13 +2,12 @@ import os
 import re
 
 import sentry_sdk
+from database import engine, init_db
 from flask import Flask, redirect, request
 from flask_cors import CORS
+from models import Link
 from sqlalchemy import func
 from sqlmodel import Session, select
-
-from database import engine, init_db
-from models import Link
 
 if os.path.exists(".env"):
     from dotenv import load_dotenv

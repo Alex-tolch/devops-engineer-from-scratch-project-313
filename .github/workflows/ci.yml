@@ -16,18 +16,18 @@ jobs:
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
-          cache-dependency-glob: "app/pyproject.toml"
+          cache-dependency-glob: "pyproject.toml"
 
       - name: Set up Python
-        run: cd app && uv python install
+        run: uv python install
 
       - name: Install dependencies
-        run: cd app && uv sync
+        run: uv sync
 
       - name: Run tests
-        run: cd app && uv run pytest
+        run: uv run pytest
 
       - name: Run Ruff
         run: |
-          cd app && uv run ruff check .
-          cd app && uv run ruff format --check .
+          uv run ruff check app
+          uv run ruff format --check app

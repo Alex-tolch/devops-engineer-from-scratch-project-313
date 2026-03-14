@@ -1,8 +1,7 @@
 import os
 
-from sqlmodel import Session, create_engine
-
 from models import Link
+from sqlmodel import Session, create_engine
 
 _db_url = (os.environ.get("DATABASE_URL") or "").strip()
 # SQLAlchemy 2.x использует диалект "postgresql", а не "postgres"

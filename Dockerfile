@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends nginx \
 
 WORKDIR /app
 
-COPY app/pyproject.toml app/uv.lock* ./
+COPY pyproject.toml uv.lock* ./
 RUN uv sync --no-dev --no-install-project
 ENV PATH="/app/.venv/bin:$PATH"
 

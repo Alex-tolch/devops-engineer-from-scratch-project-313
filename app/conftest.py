@@ -5,10 +5,9 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("BASE_URL", "https://short.io")
 
 import pytest
-from sqlmodel import Session, select
-
 from database import engine, init_db
 from models import Link
+from sqlmodel import Session, select
 
 
 @pytest.fixture(autouse=True)
