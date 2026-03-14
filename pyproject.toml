@@ -1,7 +1,7 @@
 [project]
-name = "devops-engineer-from-scratch-project-313"
+name = "hexlet-code"
 version = "0.1.0"
-description = "Add your description here"
+description = "hexlet-code"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

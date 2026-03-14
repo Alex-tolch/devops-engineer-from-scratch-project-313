@@ -2,7 +2,7 @@ import os
 import re
 
 import sentry_sdk
-from flask import Flask, request
+from flask import Flask, redirect, request
 from flask_cors import CORS
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -168,6 +168,15 @@ def delete_link(link_id):
         session.delete(link)
         session.commit()
         return "", 204
+
+
+@app.route("/r/<short_name>", methods=["GET"])
+def redirect_by_short_name(short_name):
+    with Session(engine) as session:
+        link = session.exec(select(Link).where(Link.short_name == short_name)).first()
+        if not link:
+            return {"error": "Not Found"}, 404
+        return redirect(link.original_url, code=302)
 
 
 @app.errorhandler(404)
