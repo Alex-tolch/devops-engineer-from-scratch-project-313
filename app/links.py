@@ -37,9 +37,7 @@ def get_link_by_id(session: Session, link_id: int) -> Link | None:
 
 
 def get_link_by_short_name(session: Session, short_name: str) -> Link | None:
-    return session.exec(
-        select(Link).where(Link.short_name == short_name)
-    ).first()
+    return session.exec(select(Link).where(Link.short_name == short_name)).first()
 
 
 def short_name_exists(
@@ -51,9 +49,7 @@ def short_name_exists(
     return session.exec(q).first() is not None
 
 
-def create_link(
-    session: Session, original_url: str, short_name: str
-) -> Link:
+def create_link(session: Session, original_url: str, short_name: str) -> Link:
     link = Link(original_url=original_url, short_name=short_name)
     session.add(link)
     session.commit()
