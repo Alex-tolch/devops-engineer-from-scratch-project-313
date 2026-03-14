@@ -7,16 +7,7 @@ RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
 
 RUN cp -r ./node_modules/@hexlet/project-devops-deploy-crud-frontend/dist/. /app/public/
 
-# Backend: Python deps
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
-
-WORKDIR /app
-
-COPY pyproject.toml uv.lock* ./
-RUN uv sync --no-dev --no-install-project
-
-# Runtime stage
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends nginx \
     && rm -rf /var/lib/apt/lists/* \
@@ -24,9 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends nginx \
 
 WORKDIR /app
 
-COPY --from=builder /app/.venv /app/.venv
+COPY app/pyproject.toml app/uv.lock* ./
+RUN uv sync --no-dev --no-install-project
 ENV PATH="/app/.venv/bin:$PATH"
-COPY main.py models.py database.py ./
+
+COPY app/main.py app/models.py app/database.py ./
 
 # Frontend static
 COPY --from=frontend /app/public /app/public

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "backend": "uv run python main.py",
+    "backend": "cd app && uv run python main.py",
     "frontend": "npx start-hexlet-devops-deploy-crud-frontend",
     "dev": "concurrently \"npm run backend\" \"npm run frontend\""
   },

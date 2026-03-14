@@ -4,7 +4,10 @@ from sqlmodel import Session, create_engine
 
 from models import Link
 
-_db_url = os.environ.get("DATABASE_URL", "").strip()
+_db_url = (os.environ.get("DATABASE_URL") or "").strip()
+# SQLAlchemy 2.x использует диалект "postgresql", а не "postgres"
+if _db_url.startswith("postgres://"):
+    _db_url = "postgresql://" + _db_url[len("postgres://") :]
 
 engine = create_engine(
     _db_url or "sqlite:///./links.db",

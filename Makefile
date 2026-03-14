@@ -2,12 +2,12 @@ run:
 ifdef FRAMEWORK
 	npm run dev
 else
-	uv run python main.py
+	cd app && uv run python main.py
 endif
 
 test:
-	uv run pytest
+	cd app && uv run pytest
 
 lint:
-	uv run ruff check .
-	uv run ruff format --check .
+	cd app && uv run ruff check .
+	cd app && uv run ruff format --check .
