@@ -80,14 +80,10 @@ def get_link_by_id(link_id: int) -> Link | None:
 
 def get_link_by_short_name(short_name: str) -> Link | None:
     with Session(engine) as session:
-        return session.exec(
-            select(Link).where(Link.short_name == short_name)
-        ).first()
+        return session.exec(select(Link).where(Link.short_name == short_name)).first()
 
 
-def try_create_link(
-    original_url: str, short_name: str
-) -> Link | Literal["duplicate"]:
+def try_create_link(original_url: str, short_name: str) -> Link | Literal["duplicate"]:
     with Session(engine) as session:
         if _short_name_exists(session, short_name):
             return "duplicate"
