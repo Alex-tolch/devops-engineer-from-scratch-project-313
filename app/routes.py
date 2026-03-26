@@ -1,25 +1,16 @@
 import os
 import re
 
-from database import engine
 from flask import Blueprint, redirect, request
-from links import (
-    create_link as create_link_record,
-)
-from links import (
-    delete_link as delete_link_record,
-)
 from links import (
     get_link_by_id,
     get_link_by_short_name,
     get_links_with_total,
-    short_name_exists,
-)
-from links import (
-    update_link as update_link_record,
+    try_create_link,
+    try_delete_link,
+    try_update_link,
 )
 from models import Link
-from sqlmodel import Session
 
 bp = Blueprint("api", __name__)
 
@@ -70,8 +61,7 @@ def ping():
 @bp.route("/api/links", methods=["GET"])
 def list_links():
     range_param = _parse_range(request.args.get("range"))
-    with Session(engine) as session:
-        links_list, total, content_range = get_links_with_total(session, range_param)
+    links_list, total, content_range = get_links_with_total(range_param)
     return (
         [_link_to_json(link) for link in links_list],
         200,
@@ -88,17 +78,15 @@ def create_link():
     short_name = data.get("short_name")
     if not original_url or not short_name:
         return _validation_error_required()
-    with Session(engine) as session:
-        if short_name_exists(session, short_name):
-            return {"detail": "short_name already exists"}, 422
-        link = create_link_record(session, original_url, short_name)
-    return _link_to_json(link), 201
+    result = try_create_link(original_url, short_name)
+    if result == "duplicate":
+        return {"detail": "short_name already exists"}, 422
+    return _link_to_json(result), 201
 
 
 @bp.route("/api/links/<int:link_id>", methods=["GET"])
 def get_link(link_id):
-    with Session(engine) as session:
-        link = get_link_by_id(session, link_id)
+    link = get_link_by_id(link_id)
     if not link:
         return {"detail": "Not Found"}, 404
     return _link_to_json(link)
@@ -113,29 +101,24 @@ def update_link(link_id):
     short_name = data.get("short_name")
     if not original_url or not short_name:
         return _validation_error_required()
-    with Session(engine) as session:
-        link = get_link_by_id(session, link_id)
-        if not link:
-            return {"detail": "Not Found"}, 404
-        if short_name_exists(session, short_name, exclude_id=link_id):
-            return {"detail": "short_name already exists"}, 422
-        updated = update_link_record(session, link_id, original_url, short_name)
-    return _link_to_json(updated)  # type: ignore[arg-type]
+    result = try_update_link(link_id, original_url, short_name)
+    if result == "not_found":
+        return {"detail": "Not Found"}, 404
+    if result == "duplicate":
+        return {"detail": "short_name already exists"}, 422
+    return _link_to_json(result)
 
 
 @bp.route("/api/links/<int:link_id>", methods=["DELETE"])
 def delete_link(link_id):
-    with Session(engine) as session:
-        deleted = delete_link_record(session, link_id)
-    if not deleted:
+    if not try_delete_link(link_id):
         return {"detail": "Not Found"}, 404
     return "", 204
 
 
 @bp.route("/r/<short_name>", methods=["GET"])
 def redirect_by_short_name(short_name):
-    with Session(engine) as session:
-        link = get_link_by_short_name(session, short_name)
+    link = get_link_by_short_name(short_name)
     if not link:
         return {"detail": "Not Found"}, 404
     return redirect(link.original_url, code=302)

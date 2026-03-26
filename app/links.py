@@ -1,9 +1,12 @@
+from typing import Literal
+
+from database import engine
 from models import Link
 from sqlalchemy import func
 from sqlmodel import Session, select
 
 
-def get_links_with_total(
+def _get_links_with_total(
     session: Session, range_param: tuple[int, int] | None
 ) -> tuple[list[Link], int, str]:
     count_row = session.exec(select(func.count()).select_from(Link)).one()
@@ -32,15 +35,7 @@ def get_links_with_total(
     return (links_list, total, content_range)
 
 
-def get_link_by_id(session: Session, link_id: int) -> Link | None:
-    return session.get(Link, link_id)
-
-
-def get_link_by_short_name(session: Session, short_name: str) -> Link | None:
-    return session.exec(select(Link).where(Link.short_name == short_name)).first()
-
-
-def short_name_exists(
+def _short_name_exists(
     session: Session, short_name: str, exclude_id: int | None = None
 ) -> bool:
     q = select(Link).where(Link.short_name == short_name)
@@ -49,7 +44,7 @@ def short_name_exists(
     return session.exec(q).first() is not None
 
 
-def create_link(session: Session, original_url: str, short_name: str) -> Link:
+def _insert_link(session: Session, original_url: str, short_name: str) -> Link:
     link = Link(original_url=original_url, short_name=short_name)
     session.add(link)
     session.commit()
@@ -57,7 +52,7 @@ def create_link(session: Session, original_url: str, short_name: str) -> Link:
     return link
 
 
-def update_link(
+def _update_link_row(
     session: Session, link_id: int, original_url: str, short_name: str
 ) -> Link | None:
     link = session.get(Link, link_id)
@@ -71,10 +66,52 @@ def update_link(
     return link
 
 
-def delete_link(session: Session, link_id: int) -> bool:
-    link = session.get(Link, link_id)
-    if not link:
-        return False
-    session.delete(link)
-    session.commit()
-    return True
+def get_links_with_total(
+    range_param: tuple[int, int] | None,
+) -> tuple[list[Link], int, str]:
+    with Session(engine) as session:
+        return _get_links_with_total(session, range_param)
+
+
+def get_link_by_id(link_id: int) -> Link | None:
+    with Session(engine) as session:
+        return session.get(Link, link_id)
+
+
+def get_link_by_short_name(short_name: str) -> Link | None:
+    with Session(engine) as session:
+        return session.exec(
+            select(Link).where(Link.short_name == short_name)
+        ).first()
+
+
+def try_create_link(
+    original_url: str, short_name: str
+) -> Link | Literal["duplicate"]:
+    with Session(engine) as session:
+        if _short_name_exists(session, short_name):
+            return "duplicate"
+        return _insert_link(session, original_url, short_name)
+
+
+def try_update_link(
+    link_id: int, original_url: str, short_name: str
+) -> Link | Literal["not_found", "duplicate"]:
+    with Session(engine) as session:
+        link = session.get(Link, link_id)
+        if not link:
+            return "not_found"
+        if _short_name_exists(session, short_name, exclude_id=link_id):
+            return "duplicate"
+        updated = _update_link_row(session, link_id, original_url, short_name)
+        return updated if updated is not None else "not_found"
+
+
+def try_delete_link(link_id: int) -> bool:
+    with Session(engine) as session:
+        link = session.get(Link, link_id)
+        if not link:
+            return False
+        session.delete(link)
+        session.commit()
+        return True
